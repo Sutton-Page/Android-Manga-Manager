@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/main2">
+    <fragment
+        android:id="@+id/main2"
+        android:name="com.example.manga.main"
+        android:label="fragment_main"
+        tools:layout="@layout/fragment_main" >
+        <action
+            android:id="@+id/action_main2_to_add_manga3"
+            app:destination="@id/add_manga3" />
+        <action
+            android:id="@+id/action_main2_to_comic_Item"
+            app:destination="@id/comic_Item" />
+    </fragment>
+    <fragment
+        android:id="@+id/add_manga3"
+        android:name="com.example.manga.add_manga"
+        android:label="fragment_add_manga"
+        tools:layout="@layout/fragment_add_manga" />
+    <fragment
+        android:id="@+id/comic_Item"
+        android:name="com.example.manga.Comic_Item"
+        android:label="fragment_comic__item"
+        tools:layout="@layout/fragment_comic__item" >
+        <argument
+            android:name="comicId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
+</navigation>

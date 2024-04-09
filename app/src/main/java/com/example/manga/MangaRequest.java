@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class MangaRequest {
 
 
-    private String baseUrl = "https://api.mangadex.org/manga?title=%s&limit=3&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&includes[]=cover_art&order[relevance]=desc";
+    private String baseUrl = "https://api.mangadex.org/manga?title=%s&limit=4&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&includes[]=cover_art&order[relevance]=desc";
     private String mangaTitle;
 
     private String imageBaseUrl = "https://mangadex.org/covers/%s/%s";
@@ -25,7 +25,14 @@ public class MangaRequest {
 
     private ArrayList<String> imageUrls;
 
+
+
     private int maxResults;
+
+
+
+    private String coverAPI = "https://api.mangadex.org/cover?order[volume]=asc&manga[]=%s&limit=100&offset=0";
+
 
 
     private String pullData() throws Exception{

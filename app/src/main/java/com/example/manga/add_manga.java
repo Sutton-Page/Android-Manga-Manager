@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -15,18 +16,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.manga.databinding.FragmentAddMangaBinding;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link add_manga#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class add_manga extends Fragment {
+public class add_manga extends Fragment implements UpdateText {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -44,6 +48,8 @@ public class add_manga extends Fragment {
 
     FragmentAddMangaBinding binding;
     NavController nav;
+
+    private ArrayList<String> coverData = new ArrayList<>();
 
 
     public add_manga() {
@@ -122,6 +128,15 @@ public class add_manga extends Fragment {
         });
 
 
+        LinearLayoutManager ll = new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false);
+
+
+
+        MangaCoverAdapter adapter = new MangaCoverAdapter(getContext(),this.coverData,this);
+        binding.coverPreview.setAdapter(adapter);
+        binding.coverPreview.setLayoutManager(ll);
+
+
         binding.searchSubmit.setOnClickListener(l ->{
 
             String query = binding.titleInput.getText().toString();
@@ -137,7 +152,15 @@ public class add_manga extends Fragment {
                     handle.post( () -> {
 
                         binding.urlInput.setText(mangaUrl);
-                        Glide.with(getContext()).load(mangaUrl).into(binding.displayCover);
+                        //Glide.with(getContext()).load(mangaUrl).into(binding.displayCover);
+
+                        this.coverData.add(mangaUrl);
+                        adapter.notifyDataSetChanged();
+
+
+
+
+
                     });
 
                 } catch (Exception e) {
@@ -162,5 +185,11 @@ public class add_manga extends Fragment {
 
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_add_manga, container, false);
+    }
+
+    @Override
+    public void onImageClicked(String text) {
+
+        this.binding.urlInput.setText(text);
     }
 }

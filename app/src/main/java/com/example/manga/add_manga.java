@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.os.Handler;
@@ -121,14 +122,12 @@ public class add_manga extends Fragment implements UpdateText {
                 Snackbar.make(getContext(),view,"Added Manga",Snackbar.LENGTH_LONG).show();
         });
 
-        binding.back.setOnClickListener(l -> {
-
-            this.nav.popBackStack();
-
-        });
 
 
-        LinearLayoutManager ll = new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false);
+
+        //LinearLayoutManager ll = new LinearLayoutManager(getContext(),LinearLayoutManager.VERTICAL,false);
+
+        GridLayoutManager ll = new GridLayoutManager(getContext(),2,GridLayoutManager.VERTICAL,false);
 
 
 
@@ -139,22 +138,26 @@ public class add_manga extends Fragment implements UpdateText {
 
         binding.searchSubmit.setOnClickListener(l ->{
 
-            String query = binding.titleInput.getText().toString();
+            String query = binding.titleInput.getText().toString().replace(" ","%20");
+
+
+            this.coverData.clear();
+            adapter.notifyDataSetChanged();
 
             Thread thread = new Thread( () -> {
 
                 try{
 
-                    MangaRequest req = new MangaRequest(query);
-                    String mangaUrl = req.getMangaUrl();
+                    MangaRequest req = new MangaRequest(query,3);
+                    ArrayList<String> mangaUrls = req.getMangaUrl();
 
 
                     handle.post( () -> {
 
-                        binding.urlInput.setText(mangaUrl);
+                        binding.urlInput.setText(mangaUrls.get(0));
                         //Glide.with(getContext()).load(mangaUrl).into(binding.displayCover);
 
-                        this.coverData.add(mangaUrl);
+                        this.coverData.addAll(mangaUrls);
                         adapter.notifyDataSetChanged();
 
 
@@ -191,5 +194,7 @@ public class add_manga extends Fragment implements UpdateText {
     public void onImageClicked(String text) {
 
         this.binding.urlInput.setText(text);
+        Snackbar.make(getContext(),getView(),"Changed manga cover",Snackbar.LENGTH_SHORT).show();
+
     }
 }

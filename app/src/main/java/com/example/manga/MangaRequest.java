@@ -1,28 +1,34 @@
 package com.example.manga;
 
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class MangaRequest {
 
 
-    private String baseUrl = "https://api.mangadex.org/manga?title=%s&limit=1&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&includes[]=cover_art&order[relevance]=desc";
+    private String baseUrl = "https://api.mangadex.org/manga?title=%s&limit=3&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&includes[]=cover_art&order[relevance]=desc";
     private String mangaTitle;
 
     private String imageBaseUrl = "https://mangadex.org/covers/%s/%s";
     private String data;
 
-    private String imageUrl;
+    private ArrayList<String> imageUrls;
+
+    private int maxResults;
 
 
-    private void pullData() throws Exception{
+    private String pullData() throws Exception{
 
         String url = String.format(baseUrl,this.mangaTitle);
 
@@ -44,7 +50,7 @@ public class MangaRequest {
         in.close();
         con.disconnect();
 
-        this.data = content.toString();
+        return content.toString();
 
 
 
@@ -52,67 +58,73 @@ public class MangaRequest {
     }
 
 
-    private String parseData() throws JSONException {
+    public ArrayList<String> parseData(String content) throws JSONException {
 
-        JSONObject base = new JSONObject(this.data);
+        ArrayList<String> holder = new ArrayList<>();
+
+        JSONObject base = new JSONObject(content);
 
         JSONArray data = base.getJSONArray("data");
 
-        String mangaId;
+        for(int i = 0; i < data.length(); i++){
 
-        String imageStub = "";
+            JSONObject inner = data.getJSONObject(i);
 
-        if(data.length() > 0){
-
-            JSONObject inner = data.getJSONObject(0);
-
-            mangaId = inner.getString("id");
+            String mangaId = inner.getString("id");
 
             JSONArray rel = inner.getJSONArray("relationships");
 
-            for(int i = 0; i < rel.length(); i++){
+            for(int j = 0; j < rel.length(); j++){
 
-                JSONObject item = rel.getJSONObject(i);
+                JSONObject item = rel.getJSONObject(j);
 
                 String type = item.getString("type");
 
                 if(type.equals("cover_art")){
 
-                    imageStub = item.getJSONObject("attributes").getString("fileName");
+
+
+                    String imageStub = item.getJSONObject("attributes").getString("fileName");
+
+                    //Log.d("retrieve", String.format(this.imageBaseUrl, mangaId, imageStub));
+
+                    holder.add(String.format(this.imageBaseUrl,mangaId,imageStub));
+
+                    break;
 
 
                 }
             }
 
-            return String.format(this.imageBaseUrl,mangaId,imageStub);
 
 
-
-
-        } else{
-
-            return "";
         }
+
+        return holder;
+
 
     }
 
 
-    public MangaRequest (String mangaTitle) throws Exception {
+
+    public MangaRequest (String mangaTitle, int maxResults) throws Exception {
 
         this.mangaTitle = mangaTitle;
 
-        this.pullData();
+        String result =this.pullData();
 
-        this.imageUrl = this.parseData();
+        this.imageUrls = this.parseData(result);
+
+        this.maxResults = maxResults;
 
 
 
 
     }
 
-    public String getMangaUrl(){
+    public ArrayList<String> getMangaUrl(){
 
-        return this.imageUrl;
+        return this.imageUrls;
     }
 
 

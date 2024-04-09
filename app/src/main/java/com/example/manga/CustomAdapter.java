@@ -87,9 +87,8 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
             int index = localDataSet.get(position).id;
 
             Bundle bundle = new Bundle();
-            bundle.putInt("comicId",index);
 
-            this.nav.navigate(R.id.comic_Item,bundle);
+            bundle.putInt("comicId",index);this.nav.navigate(R.id.comic_Item,bundle);
 
         });
 

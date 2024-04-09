@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +17,9 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.manga.databinding.FragmentAddMangaBinding;
+import com.google.android.material.snackbar.Snackbar;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -35,6 +39,8 @@ public class add_manga extends Fragment {
 
     DBHelper helper;
     private SQLiteDatabase db;
+
+    private Handler handle;
 
     FragmentAddMangaBinding binding;
     NavController nav;
@@ -83,7 +89,7 @@ public class add_manga extends Fragment {
 
         this.db.insert("manga",null,row);
 
-        Toast.makeText(getContext(),"Added Manga",Toast.LENGTH_LONG).show();
+        //Toast.makeText(getContext(),"Added Manga",Toast.LENGTH_LONG).show();
 
     }
 
@@ -92,8 +98,12 @@ public class add_manga extends Fragment {
 
         super.onViewCreated(view,savedInstanceState);
 
+
+
         binding = FragmentAddMangaBinding.bind(view);
         this.helper = new DBHelper(getContext());
+
+        this.handle = new Handler(Looper.getMainLooper());
 
         this.db = helper.getWritableDatabase();
         this.nav = Navigation.findNavController(view);
@@ -102,6 +112,7 @@ public class add_manga extends Fragment {
         binding.submit.setOnClickListener(l -> {
 
                 this.addManga();
+                Snackbar.make(getContext(),view,"Added Manga",Snackbar.LENGTH_LONG).show();
         });
 
         binding.back.setOnClickListener(l -> {
@@ -111,6 +122,34 @@ public class add_manga extends Fragment {
         });
 
 
+        binding.searchSubmit.setOnClickListener(l ->{
+
+            String query = binding.titleInput.getText().toString();
+
+            Thread thread = new Thread( () -> {
+
+                try{
+
+                    MangaRequest req = new MangaRequest(query);
+                    String mangaUrl = req.getMangaUrl();
+
+
+                    handle.post( () -> {
+
+                        binding.urlInput.setText(mangaUrl);
+                        Glide.with(getContext()).load(mangaUrl).into(binding.displayCover);
+                    });
+
+                } catch (Exception e) {
+
+                    Log.d("URL", e.getMessage());
+                    throw new RuntimeException(e);
+                }
+
+            });
+
+            thread.start();
+        });
 
 
 

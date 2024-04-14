@@ -2,6 +2,7 @@ package com.example.manga;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -112,6 +113,19 @@ public class Comic_Item extends Fragment implements  CoverPickerDialogue.OnImage
 
 
 
+
+    }
+
+    public void updateComicUrl(int id, String newUrl){
+
+        this.db = this.helper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put("url",newUrl);
+        String[] idValue = {String.valueOf(id)};
+
+        db.update("manga",values,"id = ?",idValue );
 
     }
 
@@ -248,14 +262,22 @@ public class Comic_Item extends Fragment implements  CoverPickerDialogue.OnImage
         // Handle the selected image URL here in the parent fragment
         // For example, load the image into an ImageView
         // Glide.with(requireContext()).load(imageUrl).into(imageView);
-
         Glide.with(requireContext()).load(imageUrl).into(binding.mangaCover);
+
+        // updating db with new image url
+
+        this.updateComicUrl(this.idArg,imageUrl);
+
+        Snackbar.make(getView(),"Updated comic cover",Snackbar.LENGTH_LONG).show();
+
 
         // Close the dialog
         Fragment dialogFragment = getChildFragmentManager().findFragmentByTag("ImagePickerDialog");
         if (dialogFragment != null) {
             DialogFragment df = (DialogFragment) dialogFragment;
             df.dismiss();
+
+
         }
     }
 }

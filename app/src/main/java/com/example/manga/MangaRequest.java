@@ -35,9 +35,47 @@ public class MangaRequest {
 
 
 
-    private String pullData() throws Exception{
 
-        String url = String.format(baseUrl,this.mangaTitle);
+
+    private String getFirstId(String content) throws JSONException {
+
+        JSONObject base = new JSONObject(content);
+
+        JSONArray data = base.getJSONArray("data");
+
+        JSONObject inner = data.getJSONObject(0);
+
+        return inner.getString("id");
+
+
+    }
+
+    private ArrayList<String> parseComicCovers(String mangaId, String content) throws JSONException {
+
+        JSONObject base = new JSONObject(content);
+
+        JSONArray data = base.getJSONArray("data");
+
+        ArrayList<String> coverUrls = new ArrayList<>();
+
+        for(int i = 0; i < data.length(); i++){
+
+            String imageStub = data.getJSONObject(i).getJSONObject("attributes").getString("fileName");
+
+            coverUrls.add(String.format(this.imageBaseUrl,mangaId,imageStub));
+
+        }
+
+        return coverUrls;
+
+
+
+    }
+
+
+    private String pullData(String url) throws Exception{
+
+        //String url = String.format(baseUrl,this.mangaTitle);
 
         URL request = new URL(url);
         HttpURLConnection con = (HttpURLConnection) request.openConnection();
@@ -112,13 +150,28 @@ public class MangaRequest {
 
     }
 
+    private void searchListCovers() throws Exception {
+
+        String result = this.pullData(String.format(baseUrl,this.mangaTitle));
+
+        String mangaId = this.getFirstId(result);
+
+
+        String coverResult = this.pullData(String.format(this.coverAPI,mangaId));
+
+        this.imageUrls  = this.parseComicCovers(mangaId,coverResult);
+
+
+
+    }
+
 
 
     public MangaRequest (String mangaTitle, int maxResults) throws Exception {
 
         this.mangaTitle = mangaTitle;
 
-        String result =this.pullData();
+        String result =this.pullData(String.format(baseUrl,this.mangaTitle));
 
         this.imageUrls = this.parseData(result);
 

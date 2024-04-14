@@ -89,12 +89,7 @@ public class main extends Fragment {
 
 
 
-
-
-
-
     }
-
 
 
     public void dbTest(CustomAdapter adapter){
@@ -131,13 +126,6 @@ public class main extends Fragment {
 
 
 
-
-
-
-
-
-
-
     }
 
     @Override
@@ -151,6 +139,7 @@ public class main extends Fragment {
         this.adapter = new CustomAdapter(getContext(),this.nav,this.comicData);
 
         binding.floatAdd.setOnClickListener(v -> {
+
 
             this.nav.navigate(R.id.add_manga3);
         });

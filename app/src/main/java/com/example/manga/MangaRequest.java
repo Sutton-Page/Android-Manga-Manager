@@ -166,6 +166,11 @@ public class MangaRequest {
     }
 
 
+    public MangaRequest(String mangaTitle) throws Exception {
+
+        this.mangaTitle = mangaTitle;
+        this.searchListCovers();
+    }
 
     public MangaRequest (String mangaTitle, int maxResults) throws Exception {
 

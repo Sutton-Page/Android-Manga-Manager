@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import com.bumptech.glide.Glide;
 import com.example.manga.databinding.FragmentAddMangaBinding;
 import com.example.manga.databinding.FragmentComicItemBinding;
+import com.google.android.material.snackbar.Snackbar;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -93,6 +94,18 @@ public class Comic_Item extends Fragment {
 
     }
 
+    public void deleteComic(int id){
+
+        this.db = this.helper.getWritableDatabase();
+        String[] values = {String.valueOf(id)};
+
+        this.db.delete("manga","id = ?", values);
+
+
+
+
+    }
+
     @Override
     public void onViewCreated(View view ,Bundle savedInstanceState ){
 
@@ -131,6 +144,16 @@ public class Comic_Item extends Fragment {
 
                 clipBoard.setPrimaryClip(clipData);
 
+
+            });
+
+            binding.deleteManga.setOnClickListener(l ->{
+
+                this.deleteComic(idArg);
+
+                Snackbar.make(view,"Deleted Manga",Snackbar.LENGTH_LONG).show();
+
+                this.nav.popBackStack();
 
             });
 

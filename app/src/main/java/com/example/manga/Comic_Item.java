@@ -7,10 +7,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,12 +24,15 @@ import com.example.manga.databinding.FragmentAddMangaBinding;
 import com.example.manga.databinding.FragmentComicItemBinding;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link Comic_Item#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class Comic_Item extends Fragment {
+public class Comic_Item extends Fragment implements  CoverPickerDialogue.OnImageSelectedListener{
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -40,6 +47,8 @@ public class Comic_Item extends Fragment {
 
     DBHelper helper;
     private SQLiteDatabase db;
+
+    private Handler handle;
 
     FragmentComicItemBinding binding;
     NavController nav;
@@ -106,6 +115,42 @@ public class Comic_Item extends Fragment {
 
     }
 
+
+
+
+    private void openImagePickerDialog(ArrayList<String> data) {
+
+        /*
+        ArrayList<String> test = new ArrayList<>();
+
+        test.add("https://mangadex.org/covers/37f5cce0-8070-4ada-96e5-fa24b1bd4ff9/6bfc8f2a-7510-4746-90d6-b97d01c20796.jpg.512.jpg");
+        test.add("https://mangadex.org/covers/37f5cce0-8070-4ada-96e5-fa24b1bd4ff9/6bfc8f2a-7510-4746-90d6-b97d01c20796.jpg.512.jpg");
+
+        test.add("https://mangadex.org/covers/37f5cce0-8070-4ada-96e5-fa24b1bd4ff9/6bfc8f2a-7510-4746-90d6-b97d01c20796.jpg.512.jpg");
+        test.add("https://mangadex.org/covers/37f5cce0-8070-4ada-96e5-fa24b1bd4ff9/6bfc8f2a-7510-4746-90d6-b97d01c20796.jpg.512.jpg");
+
+        */
+
+
+
+        CoverPickerDialogue dialogFragment = new CoverPickerDialogue(data);
+
+        dialogFragment.setOnImageSelectedListener(this);
+
+        // Show the dialog fragment
+        dialogFragment.show(getChildFragmentManager(), "ImagePickerDialog");
+    }
+
+
+    private void copyTitletoClip(MangaItem item){
+
+        ClipboardManager clipBoard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+
+        ClipData clipData = ClipData.newPlainText("Manga Title",item.title);
+
+        clipBoard.setPrimaryClip(clipData);
+    }
+
     @Override
     public void onViewCreated(View view ,Bundle savedInstanceState ){
 
@@ -116,6 +161,8 @@ public class Comic_Item extends Fragment {
 
         this.db = helper.getWritableDatabase();
         this.nav = Navigation.findNavController(view);
+
+        this.handle = new Handler(Looper.getMainLooper());
 
         if(getArguments() != null){
 
@@ -129,22 +176,40 @@ public class Comic_Item extends Fragment {
             String value = "The comicId is " + idArg;
            // binding.argTest.setText(value);
 
+
             MangaItem item = getComic(idArg);
+
+            this.copyTitletoClip(item);
 
             binding.mangaTitle.setText(item.title);
 
             Glide.with(getContext()).load(item.imageUrl).into(binding.mangaCover);
 
 
-            binding.mangaCover.setOnClickListener(l ->{
 
-                ClipboardManager clipBoard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            binding.mangaCover.setOnClickListener( l ->{
 
-                ClipData clipData = ClipData.newPlainText("Manga Title",item.title);
+                    Thread thread = new Thread(() -> {
 
-                clipBoard.setPrimaryClip(clipData);
+                        try{
 
+                            MangaRequest req = new MangaRequest(item.title);
+                            ArrayList<String> mangaUrls = req.getMangaUrl();
 
+                            handle.post( () -> {
+
+                                this.openImagePickerDialog(mangaUrls);
+                            });
+
+                        } catch(Exception e){
+
+                            Log.d("URL", e.getMessage());
+                            throw new RuntimeException(e);
+                        }
+
+                    });
+
+                    thread.start();
             });
 
             binding.deleteManga.setOnClickListener(l ->{
@@ -158,24 +223,8 @@ public class Comic_Item extends Fragment {
             });
 
 
-            binding.copyText.setOnClickListener(l -> {
 
 
-                ClipboardManager clipBoard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-
-                ClipData clipData = ClipData.newPlainText("Manga Title",item.title);
-
-                clipBoard.setPrimaryClip(clipData);
-
-
-
-
-            });
-
-            binding.goBack.setOnClickListener(l ->{
-
-                this.nav.popBackStack();
-            });
 
 
 
@@ -192,5 +241,21 @@ public class Comic_Item extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_comic__item, container, false);
+    }
+
+    @Override
+    public void onImageSelected(String imageUrl) {
+        // Handle the selected image URL here in the parent fragment
+        // For example, load the image into an ImageView
+        // Glide.with(requireContext()).load(imageUrl).into(imageView);
+
+        Glide.with(requireContext()).load(imageUrl).into(binding.mangaCover);
+
+        // Close the dialog
+        Fragment dialogFragment = getChildFragmentManager().findFragmentByTag("ImagePickerDialog");
+        if (dialogFragment != null) {
+            DialogFragment df = (DialogFragment) dialogFragment;
+            df.dismiss();
+        }
     }
 }

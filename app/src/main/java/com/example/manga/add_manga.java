@@ -116,6 +116,13 @@ public class add_manga extends Fragment implements UpdateText {
         this.nav = Navigation.findNavController(view);
 
 
+        if (getArguments() != null) {
+
+            String shareTerm = getArguments().get("term").toString();
+            binding.titleInput.setText(shareTerm);
+        }
+
+
         binding.submit.setOnClickListener(l -> {
 
                 this.addManga();

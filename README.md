@@ -10,7 +10,7 @@ By tapping on the cover, the app copies the title to my clipboard, making it eas
 ## Screenshots
 
 ### Main Page
-![](./screenshot/home.png)
+![](./screenshots/home.png)
 
 ### Page to search for manga
 ![](./screenshots/search.png)

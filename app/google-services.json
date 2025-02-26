@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "320596614824",
+    "project_id": "comic-manager-d88a9",
+    "storage_bucket": "comic-manager-d88a9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:320596614824:android:9205303f50154a9f4a2c9d",
+        "android_client_info": {
+          "package_name": "com.example.manga"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC99LAiWz9PwbbTXOObxTCAWFbMcfmbPzg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
